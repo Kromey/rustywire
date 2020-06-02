@@ -1,4 +1,5 @@
 use std::net::UdpSocket;
+use std::str;
 
 fn bytes_to_u16(bytes: &[u8]) -> u16 {
     (bytes[0] as u16) << 8 | bytes[1] as u16
@@ -60,4 +61,23 @@ fn main() {
     println!("ANCOUNT: {}", ancount);
     println!("NSCOUNT: {}", nscount);
     println!("ARCOUNT: {}", arcount);
+
+    let mut queries: Vec<Vec<&str>> = Vec::new();
+    let records = &data[12..];
+    let mut offset = 0;
+
+    for _ in 0..qdcount {
+        let mut query = Vec::new();
+
+        while records[offset] > 0 {
+            let length = records[offset] as usize;
+            offset += 1;
+            query.push(str::from_utf8(&records[offset..(offset+length)]).unwrap());
+
+            offset += length;
+        }
+
+        queries.push(query);
+    }
+    println!("\nQueries:\n{:#?}", queries);
 }
