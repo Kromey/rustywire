@@ -60,7 +60,7 @@ fn main() {
     println!("NSCOUNT: {}", nscount);
     println!("ARCOUNT: {}", arcount);
 
-    let header = Header::from(&data);
+    let header = Header::from(&data[..12]);
     println!("{:#?}", header);
 
     let mut queries: Vec<Vec<&str>> = Vec::new();

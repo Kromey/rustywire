@@ -10,8 +10,8 @@ pub struct Header {
     addl_count: u16,
 }
 
-impl From<&&mut [u8]> for Header {
-    fn from(bytes: &&mut [u8]) -> Header {
+impl From<&[u8]> for Header {
+    fn from(bytes: &[u8]) -> Header {
         assert!(bytes.len() >= 12);
 
         let id = bytes_to_u16(&bytes);
