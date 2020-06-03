@@ -60,7 +60,7 @@ fn main() {
     println!("NSCOUNT: {}", nscount);
     println!("ARCOUNT: {}", arcount);
 
-    let message = Message::from(&buf[..number_of_bytes]);
+    let message = Message::from(buf[..number_of_bytes].to_vec());
     println!("\n{:#?}", message);
 
     let mut queries: Vec<Vec<&str>> = Vec::new();
