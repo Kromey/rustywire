@@ -76,8 +76,25 @@ fn main() {
 
             offset += length;
         }
+        // Move past the last length field we just read
+        offset += 1;
+
+        // Read the QTYPE field
+        //let qtype = bytes_to_u16(&records[offset..=offset+1]);
+        query.push(str::from_utf8(&records[offset..=offset+1]).unwrap());
+        offset += 2;
+        // Read the QCLASS field
+        query.push(str::from_utf8(&records[offset..=offset+1]).unwrap());
+        offset += 2;
 
         queries.push(query);
     }
     println!("\nQueries:\n{:#?}", queries);
+
+    //let mut additional: Vec<Vec<&str>> = Vec::new();
+    //for _ in 0..arcount {
+    //    let mut record = Vec::new();
+
+    //    while records[offset] > 0;
+    //}
 }
