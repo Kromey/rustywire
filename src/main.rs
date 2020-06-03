@@ -15,7 +15,7 @@ fn main() {
     let (number_of_bytes, src_addr) = socket.recv_from(&mut buf).expect("No data!");
     println!("Got {} bytes from {:?}", number_of_bytes, src_addr);
 
-    let data = &mut buf[..number_of_bytes];
+    let data = &buf[..number_of_bytes];
     for byte in data.iter() {
         print!("{:02X} ", byte);
     }
@@ -60,8 +60,8 @@ fn main() {
     println!("NSCOUNT: {}", nscount);
     println!("ARCOUNT: {}", arcount);
 
-    let message = Message::from(&data[..12]);
-    println!("{:#?}", message);
+    let message = Message::from(&buf[..number_of_bytes]);
+    println!("\n{:#?}", message);
 
     let mut queries: Vec<Vec<&str>> = Vec::new();
     let records = &data[12..];
