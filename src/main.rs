@@ -1,13 +1,7 @@
+use rustywire::message::Header;
+use rustywire::utils::{bytes_to_u16, bytes_to_u32};
 use std::net::UdpSocket;
 use std::str;
-
-fn bytes_to_u16(bytes: &[u8]) -> u16 {
-    (bytes[0] as u16) << 8 | bytes[1] as u16
-}
-
-fn bytes_to_u32(bytes: &[u8]) -> u32 {
-    (bytes_to_u16(&bytes[0..2]) as u32) << 16 | bytes_to_u16(&bytes[2..4]) as u32
-}
 
 fn main() {
     println!("Hello, world!");
@@ -65,6 +59,9 @@ fn main() {
     println!("ANCOUNT: {}", ancount);
     println!("NSCOUNT: {}", nscount);
     println!("ARCOUNT: {}", arcount);
+
+    let header = Header::from(&data);
+    println!("{:#?}", header);
 
     let mut queries: Vec<Vec<&str>> = Vec::new();
     let records = &data[12..];
