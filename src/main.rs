@@ -5,6 +5,10 @@ fn bytes_to_u16(bytes: &[u8]) -> u16 {
     (bytes[0] as u16) << 8 | bytes[1] as u16
 }
 
+fn bytes_to_u32(bytes: &[u8]) -> u32 {
+    (bytes_to_u16(&bytes[0..2]) as u32) << 16 | bytes_to_u16(&bytes[2..4]) as u32
+}
+
 fn main() {
     println!("Hello, world!");
     println!("Starting UDP socket...");
@@ -91,10 +95,42 @@ fn main() {
     }
     println!("\nQueries:\n{:#?}", queries);
 
-    //let mut additional: Vec<Vec<&str>> = Vec::new();
-    //for _ in 0..arcount {
-    //    let mut record = Vec::new();
+    println!("\nAdditional Records:");
+    for _ in 0..arcount {
+        let mut record = Vec::new();
 
-    //    while records[offset] > 0;
-    //}
+        // Read the name, same as before
+        while records[offset] > 0 {
+            let length = records[offset] as usize;
+            offset += 1;
+            record.push(str::from_utf8(&records[offset..(offset+length)]).unwrap());
+
+            offset += length;
+        }
+        // Move past the last length field we just read
+        offset += 1;
+        println!("\n{:?}", record);
+
+        println!("TYPE: {}", bytes_to_u16(&records[offset..=offset+1]));
+        offset += 2;
+
+        println!("CLASS: {}", bytes_to_u16(&records[offset..=offset+1]));
+        offset += 2;
+
+        // TTL is 32-bit, unlike other 16-bite values
+        println!("TTL: {}", bytes_to_u32(&records[offset..=offset+3]));
+        offset += 4;
+
+        let rdlength = bytes_to_u16(&records[offset..=offset+1]) as usize;
+        println!("RDLENGTH: {}", rdlength);
+        offset += 2;
+
+        print!("RDATA:");
+        let rdata = &records[offset..offset+rdlength];
+        for byte in rdata.iter() {
+            print!(" {:02X}", byte);
+        }
+        println!("");
+        offset += rdlength;
+    }
 }
