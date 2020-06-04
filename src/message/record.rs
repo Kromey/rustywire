@@ -13,6 +13,12 @@ pub struct PartialRecord<'a> {
     pub class: Class,
 }
 
+impl PartialRecord<'_> {
+    pub fn len(&self) -> usize {
+        self.label.len() + 4
+    }
+}
+
 impl<'a> From<OffsetBytes<'a>> for PartialRecord<'a> {
     fn from(data: OffsetBytes<'a>) -> PartialRecord<'a> {
         let label = Label::from(OffsetBytes { ..data });

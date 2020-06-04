@@ -7,6 +7,12 @@ pub struct Label<'a> {
     pub bytes: usize,
 }
 
+impl Label<'_> {
+    pub fn len(&self) -> usize {
+        self.bytes
+    }
+}
+
 impl<'a> From<OffsetBytes<'a>> for Label<'a> {
     fn from(msg: OffsetBytes<'a>) -> Label<'a> {
         let mut offset = msg.offset;
