@@ -86,6 +86,6 @@ impl fmt::Display for ResourceRecord<'_> {
             bytes = format!("{}{:02X} ", bytes, byte);
         }
 
-        write!(f, "{}\t{:?}\t{:?}\t{}\t{}", self.label, self.class, self.rrtype, self.ttl, bytes)
+        write!(f, "{}\t{}\t{:?}\t{:?}\t{}", self.label, self.ttl, self.class, self.rrtype, bytes)
     }
 }
