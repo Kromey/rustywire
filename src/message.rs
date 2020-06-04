@@ -18,54 +18,44 @@ impl From<Vec<u8>> for Message {
     fn from(bytes: Vec<u8>) -> Message {
         assert!(bytes.len() >= 12);
 
-        let qry_count = bytes_to_u16(&bytes[4..]);
-        let ans_count = bytes_to_u16(&bytes[6..]);
-        let auth_count = bytes_to_u16(&bytes[8..]);
-        let addl_count = bytes_to_u16(&bytes[10..]);
+        let counts = [
+            bytes_to_u16(&bytes[4..]),
+            bytes_to_u16(&bytes[6..]),
+            bytes_to_u16(&bytes[8..]),
+            bytes_to_u16(&bytes[10..]),
+        ];
 
         let mut offset = 12;
-        for _ in 0..qry_count {
-            let data = OffsetBytes {
-                bytes: &bytes,
-                offset,
-            };
-            let query = PartialRecord::from(data);
-            println!("{}", query);
 
-            offset += query.len();
-        }
+        let mut queries = Vec::<PartialRecord>::with_capacity(counts[0] as usize);
+        let mut records = [
+            Vec::<ResourceRecord>::with_capacity(counts[1] as usize),
+            Vec::<ResourceRecord>::with_capacity(counts[2] as usize),
+            Vec::<ResourceRecord>::with_capacity(counts[3] as usize),
+        ];
+        for (i, count) in counts.iter().enumerate() {
+            for _ in 0..*count {
+                let data = OffsetBytes {
+                    bytes: &bytes,
+                    offset,
+                };
 
-        for _ in 0..ans_count {
-            let data = OffsetBytes {
-                bytes: &bytes,
-                offset,
-            };
-            let answer = ResourceRecord::from(data);
-            println!("{}", answer);
+                if i == 0 {
+                    let query = PartialRecord::from(data);
+                    println!("{}", query);
 
-            offset += answer.len();
-        }
+                    offset += query.len();
 
-        for _ in 0..auth_count {
-            let data = OffsetBytes {
-                bytes: &bytes,
-                offset,
-            };
-            let authority = ResourceRecord::from(data);
-            println!("{}", authority);
+                    queries.push(query);
+                } else {
+                    let record = ResourceRecord::from(data);
+                    println!("{}", record);
 
-            offset += authority.len();
-        }
+                    offset += record.len();
 
-        for _ in 0..addl_count {
-            let data = OffsetBytes {
-                bytes: &bytes,
-                offset,
-            };
-            let additional = ResourceRecord::from(data);
-            println!("{}", additional);
-
-            offset += additional.len();
+                    records[i-1].push(record);
+                }
+            }
         }
 
         Message {
