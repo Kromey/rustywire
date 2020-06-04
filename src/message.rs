@@ -1,4 +1,13 @@
+mod label;
+mod record;
+
 use crate::utils::bytes_to_u16;
+use record::PartialRecord;
+
+struct OffsetBytes<'a> {
+    pub bytes: &'a Vec<u8>,
+    pub offset: usize,
+}
 
 #[derive(Debug)]
 pub struct Message {
@@ -13,6 +22,16 @@ impl From<Vec<u8>> for Message {
         let ans_count = bytes_to_u16(&bytes[6..]);
         let auth_count = bytes_to_u16(&bytes[8..]);
         let addl_count = bytes_to_u16(&bytes[10..]);
+
+        let offset = 12;
+        for _ in 0..qry_count {
+            let data = OffsetBytes {
+                bytes: &bytes,
+                offset,
+            };
+            let query = PartialRecord::from(data);
+            println!("{:#?}", query);
+        }
 
         Message {
             bytes,
