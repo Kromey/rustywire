@@ -30,7 +30,7 @@ impl From<Vec<u8>> for Message {
                 offset,
             };
             let query = PartialRecord::from(data);
-            println!("{:#?}", query);
+            println!("{}", query);
         }
 
         Message {

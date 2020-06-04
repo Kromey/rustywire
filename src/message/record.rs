@@ -1,6 +1,7 @@
 mod parameters;
 
 pub use parameters::{Class, RRType};
+use std::fmt;
 use super::label::Label;
 use super::OffsetBytes;
 use crate::utils::bytes_to_u16;
@@ -25,5 +26,11 @@ impl<'a> From<OffsetBytes<'a>> for PartialRecord<'a> {
             rrtype,
             class,
         }
+    }
+}
+
+impl fmt::Display for PartialRecord<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}\t{:?}\t{:?}", self.label, self.class, self.rrtype)
     }
 }

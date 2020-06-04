@@ -1,4 +1,4 @@
-use std::str;
+use std::{fmt, str};
 use super::OffsetBytes;
 
 #[derive(Debug)]
@@ -28,5 +28,15 @@ impl<'a> From<OffsetBytes<'a>> for Label<'a> {
             label,
             bytes,
         }
+    }
+}
+
+impl fmt::Display for Label<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut output = format!("");
+        for part in self.label.iter() {
+            output = format!("{}{}.", output, part);
+        }
+        write!(f, "{}", output)
     }
 }
