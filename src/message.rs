@@ -2,7 +2,7 @@ mod label;
 mod record;
 
 use crate::utils::bytes_to_u16;
-use record::PartialRecord;
+use record::{PartialRecord, ResourceRecord};
 
 struct OffsetBytes<'a> {
     pub bytes: &'a Vec<u8>,
@@ -33,6 +33,39 @@ impl From<Vec<u8>> for Message {
             println!("{}", query);
 
             offset += query.len();
+        }
+
+        for _ in 0..ans_count {
+            let data = OffsetBytes {
+                bytes: &bytes,
+                offset,
+            };
+            let answer = ResourceRecord::from(data);
+            println!("{}", answer);
+
+            offset += answer.len();
+        }
+
+        for _ in 0..auth_count {
+            let data = OffsetBytes {
+                bytes: &bytes,
+                offset,
+            };
+            let authority = ResourceRecord::from(data);
+            println!("{}", authority);
+
+            offset += authority.len();
+        }
+
+        for _ in 0..addl_count {
+            let data = OffsetBytes {
+                bytes: &bytes,
+                offset,
+            };
+            let additional = ResourceRecord::from(data);
+            println!("{}", additional);
+
+            offset += additional.len();
         }
 
         Message {
