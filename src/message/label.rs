@@ -39,10 +39,14 @@ impl<'a> From<OffsetBytes<'a>> for Label<'a> {
 
 impl fmt::Display for Label<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut output = format!("");
-        for part in self.label.iter() {
-            output = format!("{}{}.", output, part);
+        if self.len() == 1 {
+            write!(f, ".")
+        } else {
+            let mut output = format!("");
+            for part in self.label.iter() {
+                output = format!("{}{}.", output, part);
+            }
+            write!(f, "{}", output)
         }
-        write!(f, "{}", output)
     }
 }
