@@ -3,7 +3,6 @@ mod parameters;
 pub use parameters::{Class, RRType};
 use std::fmt;
 use super::label::Label;
-use super::OffsetBytes;
 use crate::utils::{bytes_to_u16, bytes_to_u32};
 
 #[derive(Debug)]
@@ -13,21 +12,15 @@ pub struct PartialRecord<'a> {
     pub class: Class,
 }
 
-impl PartialRecord<'_> {
-    pub fn len(&self) -> usize {
-        self.label.len() + 4
-    }
-}
+impl<'a> PartialRecord<'a> {
+    pub fn from_offset(bytes: &'a [u8], offset: usize) -> PartialRecord<'a> {
+        let label = Label::from_offset(bytes, offset);
 
-impl<'a> From<OffsetBytes<'a>> for PartialRecord<'a> {
-    fn from(data: OffsetBytes<'a>) -> PartialRecord<'a> {
-        let label = Label::from(OffsetBytes { ..data });
-
-        let offset = data.offset + label.bytes;
-        let rrtype = RRType::from(bytes_to_u16(&data.bytes[offset..offset+2]));
+        let offset = offset + label.len();
+        let rrtype = RRType::from(bytes_to_u16(&bytes[offset..offset+2]));
         let class = match rrtype {
             RRType::OPT => Class::NONE,
-            _ => Class::from(bytes_to_u16(&data.bytes[offset+2..offset+4])),
+            _ => Class::from(bytes_to_u16(&bytes[offset+2..offset+4])),
         };
 
         PartialRecord {
@@ -35,6 +28,10 @@ impl<'a> From<OffsetBytes<'a>> for PartialRecord<'a> {
             rrtype,
             class,
         }
+    }
+
+    pub fn len(&self) -> usize {
+        self.label.len() + 4
     }
 }
 
@@ -53,19 +50,13 @@ pub struct ResourceRecord<'a> {
     pub data: &'a [u8],
 }
 
-impl ResourceRecord<'_> {
-    pub fn len(&self) -> usize {
-        self.label.len() + 10 + self.data.len()
-    }
-}
+impl<'a> ResourceRecord<'a> {
+    pub fn from_offset(bytes: &'a [u8], offset: usize) -> ResourceRecord<'a> {
+        let partial = PartialRecord::from_offset(bytes, offset);
 
-impl<'a> From<OffsetBytes<'a>> for ResourceRecord<'a> {
-    fn from(data: OffsetBytes<'a>) -> ResourceRecord<'a> {
-        let partial = PartialRecord::from(OffsetBytes { ..data });
-
-        let mut offset = data.offset + partial.label.bytes + 4;
-        let ttl = bytes_to_u32(&data.bytes[offset..offset+4]);
-        let data_len = bytes_to_u16(&data.bytes[offset+4..offset+6]) as usize;
+        let mut offset = offset + partial.len();
+        let ttl = bytes_to_u32(&bytes[offset..offset+4]);
+        let data_len = bytes_to_u16(&bytes[offset+4..offset+6]) as usize;
 
         offset += 6;
 
@@ -74,8 +65,12 @@ impl<'a> From<OffsetBytes<'a>> for ResourceRecord<'a> {
             rrtype: partial.rrtype,
             class: partial.class,
             ttl,
-            data: &data.bytes[offset..offset+data_len],
+            data: &bytes[offset..offset+data_len],
         }
+    }
+
+    pub fn len(&self) -> usize {
+        self.label.len() + 10 + self.data.len()
     }
 }
 

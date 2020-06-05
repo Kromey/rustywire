@@ -1,5 +1,4 @@
 use std::{fmt, str};
-use super::OffsetBytes;
 
 #[derive(Debug)]
 pub struct Label<'a> {
@@ -7,33 +6,31 @@ pub struct Label<'a> {
     pub bytes: usize,
 }
 
-impl Label<'_> {
-    pub fn len(&self) -> usize {
-        self.bytes
-    }
-}
-
-impl<'a> From<OffsetBytes<'a>> for Label<'a> {
-    fn from(msg: OffsetBytes<'a>) -> Label<'a> {
-        let mut offset = msg.offset;
-        let mut bytes = 0;
+impl<'a> Label<'a> {
+    pub fn from_offset(bytes: &'a [u8], offset: usize) -> Label<'a> {
+        let mut offset = offset;
+        let mut length = 0;
         let mut label = Vec::new();
 
-        while msg.bytes[offset] > 0 {
-            let length = msg.bytes[offset] as usize;
+        while bytes[offset] > 0 {
+            let len = bytes[offset] as usize;
             offset += 1;
-            label.push(str::from_utf8(&msg.bytes[offset..(offset+length)]).unwrap());
+            label.push(str::from_utf8(&bytes[offset..(offset+len)]).unwrap());
 
-            offset += length;
-            bytes += length + 1;
+            offset += len;
+            length += len + 1;
         }
         // Account for the final byte we read
-        bytes += 1;
+        length += 1;
 
         Label {
             label,
-            bytes,
+            bytes: length,
         }
+    }
+
+    pub fn len(&self) -> usize {
+        self.bytes
     }
 }
 
