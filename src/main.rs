@@ -1,4 +1,4 @@
-use rustywire::message::Message;
+use rustywire::message::{Flags, Message};
 use rustywire::utils::{bytes_to_u16, bytes_to_u32};
 use std::net::UdpSocket;
 use std::str;
@@ -67,6 +67,13 @@ fn main() {
 
     let message = Message::from(buf[..number_of_bytes].to_vec());
     println!("\n{:#?}", message);
+    println!("QR: {:?}", message.get_flag(Flags::QR));
+    println!("AA: {:?}", message.get_flag(Flags::AA));
+    println!("TC: {:?}", message.get_flag(Flags::TC));
+    println!("RD: {:?}", message.get_flag(Flags::RD));
+    println!("RA: {:?}", message.get_flag(Flags::RA));
+    println!("AD: {:?}", message.get_flag(Flags::AD));
+    println!("CD: {:?}", message.get_flag(Flags::CD));
 
     let mut queries: Vec<Vec<&str>> = Vec::new();
     let records = &data[12..];

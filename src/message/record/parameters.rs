@@ -21,6 +21,26 @@ pub enum RRType {
     ANY = 255,
 }
 
+/// DNS Header Flags
+#[derive(Debug)]
+pub enum Flags {
+    /// Query/Response: Set if a response, clear if a query
+    QR = 0x8000,
+    /// Authoritative Answer: Responding name server is authoritative (response)
+    AA = 0x0400,
+    /// Truncation: Indicated this response was truncated (response)
+    TC = 0x0200,
+    /// Recursion Desired: Requests the name server to recursively resolve the query (query)
+    RD = 0x0100,
+    /// Recursion Available: Indicates support for recursively resolving requests (response)
+    RA = 0x0080,
+    /// Authenticated Data: Requests DNSSEC validation, or indicates DNSSEC validation was
+    /// successful
+    AD = 0x0020,
+    /// Checking Disabled: Indicates the client does not wish the server to validate DNSSEC
+    CD = 0x0010,
+}
+
 impl From<u16> for Class {
     fn from(class: u16) -> Class {
         match class {

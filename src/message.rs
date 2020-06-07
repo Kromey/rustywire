@@ -3,6 +3,7 @@ mod record;
 
 use crate::utils::bytes_to_u16;
 use record::{PartialRecord, ResourceRecord};
+pub use record::Flags;
 
 #[derive(Debug)]
 pub struct Message {
@@ -13,6 +14,14 @@ pub struct Message {
     authorities: Vec<ResourceRecord>,
     additional: Vec<ResourceRecord>,
     is_edns: bool,
+}
+
+impl Message {
+    pub fn get_flag(&self, flag: Flags) -> bool {
+        let flag = flag as u16;
+
+        self.flags & flag > 0
+    }
 }
 
 impl From<Vec<u8>> for Message {
