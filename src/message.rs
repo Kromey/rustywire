@@ -3,7 +3,7 @@ mod record;
 
 use crate::utils::bytes_to_u16;
 use record::{PartialRecord, ResourceRecord};
-pub use record::{Flags, OpCode};
+pub use record::{Flags, OpCode, RCode};
 
 #[derive(Debug)]
 pub struct Message {
@@ -33,6 +33,20 @@ impl Message {
             5 => OpCode::Update,
             6 => OpCode::DSO,
             _ => panic!("Unknown OpCode"),
+        }
+    }
+
+    pub fn get_rcode(&self) -> RCode {
+        let code = self.flags & 0x0F;
+
+        match code {
+            0 => RCode::NoError,
+            1 => RCode::FormErr,
+            2 => RCode::ServFail,
+            3 => RCode::NXDomain,
+            4 => RCode::NotImp,
+            5 => RCode::Refused,
+            _ => panic!("Uknown RCode"),
         }
     }
 }

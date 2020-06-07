@@ -75,6 +75,7 @@ fn main() {
     println!("AD: {:?}", message.get_flag(Flags::AD));
     println!("CD: {:?}", message.get_flag(Flags::CD));
     println!("OpCode: {:?}", message.get_opcode());
+    println!("RCode: {:?}", message.get_rcode());
 
     let mut queries: Vec<Vec<&str>> = Vec::new();
     let records = &data[12..];

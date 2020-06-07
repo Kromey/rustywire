@@ -56,6 +56,17 @@ pub enum OpCode {
     DSO = 6,
 }
 
+/// DNS Header Response Code
+#[derive(Debug)]
+pub enum RCode {
+    NoError = 0,
+    FormErr = 1,
+    ServFail = 2,
+    NXDomain = 3,
+    NotImp = 4,
+    Refused = 5,
+}
+
 impl From<u16> for Class {
     fn from(class: u16) -> Class {
         match class {
