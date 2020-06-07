@@ -41,6 +41,21 @@ pub enum Flags {
     CD = 0x0010,
 }
 
+/// DNS Header OpCode
+#[derive(Debug)]
+pub enum OpCode {
+    /// Query (RFC1035)
+    Query = 0,
+    /// Server Status (RFC1035)
+    Status = 2,
+    /// Notify (RFC1996)
+    Notify = 4,
+    /// Update (RFC2136)
+    Update = 5,
+    /// DNS Stateful Operations (RFC8490)
+    DSO = 6,
+}
+
 impl From<u16> for Class {
     fn from(class: u16) -> Class {
         match class {

@@ -1,6 +1,6 @@
 mod parameters;
 
-pub use parameters::{Flags, Class, RRType};
+pub use parameters::*;
 use std::fmt;
 use super::label::Label;
 use crate::utils::{bytes_to_u16, bytes_to_u32};

@@ -3,7 +3,7 @@ mod record;
 
 use crate::utils::bytes_to_u16;
 use record::{PartialRecord, ResourceRecord};
-pub use record::Flags;
+pub use record::{Flags, OpCode};
 
 #[derive(Debug)]
 pub struct Message {
@@ -21,6 +21,19 @@ impl Message {
         let flag = flag as u16;
 
         self.flags & flag > 0
+    }
+
+    pub fn get_opcode(&self) -> OpCode {
+        let code = (self.flags >> 11) & 0x0F;
+
+        match code {
+            0 => OpCode::Query,
+            2 => OpCode::Status,
+            4 => OpCode::Notify,
+            5 => OpCode::Update,
+            6 => OpCode::DSO,
+            _ => panic!("Unknown OpCode"),
+        }
     }
 }
 
