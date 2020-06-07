@@ -12,6 +12,7 @@ pub struct Message {
     answers: Vec<ResourceRecord>,
     authorities: Vec<ResourceRecord>,
     additional: Vec<ResourceRecord>,
+    is_edns: bool,
 }
 
 impl From<Vec<u8>> for Message {
@@ -35,6 +36,7 @@ impl From<Vec<u8>> for Message {
             answers: Vec::with_capacity(answers as usize),
             authorities: Vec::with_capacity(authorities as usize),
             additional: Vec::with_capacity(additional as usize),
+            is_edns: false,
         };
 
         for _ in 0..queries {
@@ -48,6 +50,9 @@ impl From<Vec<u8>> for Message {
             let (record, new_offset) = ResourceRecord::from_offset(&bytes, offset);
             offset = new_offset;
             println!("{}", record);
+            if let record::RRType::OPT = record.rrtype {
+                msg.is_edns = true;
+            };
 
             msg.additional.push(record);
         }
