@@ -5,48 +5,49 @@ use crate::utils::bytes_to_u16;
 use record::{PartialRecord, ResourceRecord};
 
 #[derive(Debug)]
-pub struct Message<'a> {
-    bytes: Vec<u8>,
-    queries: Vec<PartialRecord<'a>>,
-    answers: Vec<ResourceRecord<'a>>,
-    authorities: Vec<ResourceRecord<'a>>,
-    additional: Vec<ResourceRecord<'a>>,
+pub struct Message {
+    id: u16,
+    flags: u16,
+    queries: Vec<PartialRecord>,
+    answers: Vec<ResourceRecord>,
+    authorities: Vec<ResourceRecord>,
+    additional: Vec<ResourceRecord>,
 }
 
-impl<'a> From<Vec<u8>> for Message<'a> {
-    fn from(bytes: Vec<u8>) -> Message<'a> {
+impl From<Vec<u8>> for Message {
+    fn from(bytes: Vec<u8>) -> Message {
         assert!(bytes.len() >= 12);
 
-        let counts = [
-            bytes_to_u16(&bytes[4..]),
-            bytes_to_u16(&bytes[6..]),
-            bytes_to_u16(&bytes[8..]),
-            bytes_to_u16(&bytes[10..]),
-        ];
+        let id = bytes_to_u16(&bytes[0..2]);
+        let flags = bytes_to_u16(&bytes[2..4]);
+
+        let queries = bytes_to_u16(&bytes[4..6]);
+        let answers = bytes_to_u16(&bytes[6..8]);
+        let authorities = bytes_to_u16(&bytes[8..10]);
+        let additional = bytes_to_u16(&bytes[10..12]);
 
         let mut offset = 12;
 
         let mut msg = Message {
-            bytes,
-            queries: Vec::<PartialRecord>::with_capacity(counts[0] as usize),
-            answers: Vec::<ResourceRecord>::with_capacity(counts[1] as usize),
-            authorities: Vec::<ResourceRecord>::with_capacity(counts[2] as usize),
-            additional: Vec::<ResourceRecord>::with_capacity(counts[3] as usize),
+            id,
+            flags,
+            queries: Vec::with_capacity(queries as usize),
+            answers: Vec::with_capacity(answers as usize),
+            authorities: Vec::with_capacity(authorities as usize),
+            additional: Vec::with_capacity(additional as usize),
         };
 
-        for _ in 0..counts[0] {
-            let query = PartialRecord::from_offset(&msg.bytes, offset);
+        for _ in 0..queries {
+            let (query, new_offset) = PartialRecord::from_offset(&bytes, offset);
+            offset = new_offset;
             println!("{}", query);
-
-            offset += query.len();
 
             msg.queries.push(query);
         }
-        for _ in 0..counts[3] {
-            let record = ResourceRecord::from_offset(&msg.bytes, offset);
+        for _ in 0..additional {
+            let (record, new_offset) = ResourceRecord::from_offset(&bytes, offset);
+            offset = new_offset;
             println!("{}", record);
-
-            offset += record.len();
 
             msg.additional.push(record);
         }
