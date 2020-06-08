@@ -18,10 +18,37 @@ pub struct Message {
 }
 
 impl Message {
+    pub fn into_response(self) -> Message {
+        // Stash a few values we'll need to copy to our response
+        let opcode = self.get_opcode();
+        let rd = self.get_flag(Flags::RD);
+
+        let mut resp = Message {
+            flags: 0,
+            answers: Vec::new(),
+            authorities: Vec::new(),
+            additional: Vec::new(),
+            is_edns: false,
+            ..self
+        };
+
+        resp.set_flag(Flags::QR);
+        if rd {
+            resp.set_flag(Flags::RD);
+        }
+        resp.set_opcode(opcode);
+
+        resp
+    }
+
     pub fn get_flag(&self, flag: Flags) -> bool {
         let flag = flag as u16;
 
         self.flags & flag > 0
+    }
+
+    pub fn set_flag(&mut self, flag: Flags) {
+        self.flags |= flag as u16;
     }
 
     pub fn get_opcode(&self) -> OpCode {
@@ -37,6 +64,13 @@ impl Message {
         }
     }
 
+    pub fn set_opcode(&mut self, code: OpCode) {
+        // Mask off any existing OpCode
+        self.flags &= !(0x0F << 11);
+        // Now we can safely set our OpCode
+        self.flags |= (code as u16) << 11;
+    }
+
     pub fn get_rcode(&self) -> RCode {
         let code = self.flags & 0x0F;
 
@@ -49,6 +83,13 @@ impl Message {
             5 => RCode::Refused,
             _ => panic!("Uknown RCode"),
         }
+    }
+
+    pub fn set_rcode(&mut self, code: RCode) {
+        // Mask off any existing RCode
+        self.flags &= !(0x0F);
+        // Now we can safetly set our RCode
+        self.flags |= code as u16;
     }
 }
 

@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum Class {
     IN = 1,
     CH = 3,
@@ -7,7 +7,7 @@ pub enum Class {
     ANY = 255,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum RRType {
     A = 1,
     NS = 2,
@@ -42,7 +42,7 @@ pub enum Flags {
 }
 
 /// DNS Header OpCode
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum OpCode {
     /// Query (RFC1035)
     Query = 0,
@@ -57,7 +57,7 @@ pub enum OpCode {
 }
 
 /// DNS Header Response Code
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum RCode {
     NoError = 0,
     FormErr = 1,

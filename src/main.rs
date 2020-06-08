@@ -1,4 +1,4 @@
-use rustywire::message::Message;
+use rustywire::message::{Message, RCode};
 use std::net::UdpSocket;
 
 fn main() {
@@ -26,4 +26,8 @@ fn main() {
 
     let message = Message::from(buf[..number_of_bytes].to_vec());
     println!("{}\n", message);
+
+    let mut resp = message.into_response();
+    resp.set_rcode(RCode::ServFail);
+    println!("{}\n", resp);
 }

@@ -5,7 +5,7 @@ use crate::utils::{bytes_to_u16, bytes_to_u32};
 pub use parameters::*;
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct PartialRecord {
     pub label: String,
     pub rrtype: RRType,
@@ -45,7 +45,7 @@ impl fmt::Display for PartialRecord {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct ResourceRecord {
     pub label: String,
     pub rrtype: RRType,
