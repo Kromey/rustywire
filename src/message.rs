@@ -1,7 +1,7 @@
 mod label;
 mod record;
 
-use crate::utils::bytes_to_u16;
+use crate::utils::{bytes_to_u16, u16_to_bytes};
 pub use record::{Flags, OpCode, RCode};
 use record::{PartialRecord, ResourceRecord};
 use std::fmt;
@@ -90,6 +90,29 @@ impl Message {
         self.flags &= !(0x0F);
         // Now we can safetly set our RCode
         self.flags |= code as u16;
+    }
+
+    pub fn as_bytes(&self) -> Vec<u8> {
+        let mut bytes = Vec::with_capacity(512);
+
+        bytes.extend(u16_to_bytes(self.id));
+        bytes.extend(u16_to_bytes(self.flags));
+
+        bytes.extend(u16_to_bytes(self.queries.len() as u16));
+        bytes.extend(u16_to_bytes(self.answers.len() as u16));
+        bytes.extend(u16_to_bytes(self.authorities.len() as u16));
+        bytes.extend(u16_to_bytes(self.additional.len() as u16));
+
+        for q in self.queries.iter() {
+            bytes.extend(q.as_bytes());
+        }
+        for records in vec![&self.answers, &self.authorities, &self.additional] {
+            for record in records.iter() {
+                bytes.extend(record.as_bytes());
+            }
+        }
+
+        bytes
     }
 }
 

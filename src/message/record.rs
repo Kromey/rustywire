@@ -1,7 +1,7 @@
 mod parameters;
 
 use super::label::Label;
-use crate::utils::{bytes_to_u16, bytes_to_u32};
+use crate::utils::{bytes_to_u16, bytes_to_u32, u16_to_bytes, u32_to_bytes};
 pub use parameters::*;
 use std::fmt;
 
@@ -36,6 +36,17 @@ impl PartialRecord {
             },
             offset,
         )
+    }
+
+    pub fn as_bytes(&self) -> Vec<u8> {
+        let mut bytes = Vec::with_capacity(self.label.len() + 5);
+
+        bytes.extend(Label::as_bytes(&self.label));
+
+        bytes.extend(u16_to_bytes(self.rrtype as u16));
+        bytes.extend(u16_to_bytes(self.class as u16));
+
+        bytes
     }
 }
 
@@ -76,6 +87,20 @@ impl ResourceRecord {
             },
             offset,
         )
+    }
+
+    pub fn as_bytes(&self) -> Vec<u8> {
+        let mut bytes = PartialRecord {
+            label: self.label.clone(),
+            rrtype: self.rrtype,
+            class: self.class,
+        }.as_bytes();
+
+        bytes.extend(u32_to_bytes(self.ttl));
+        bytes.extend(u16_to_bytes(self.data.len() as u16));
+        bytes.extend(self.data.iter());
+
+        bytes
     }
 }
 

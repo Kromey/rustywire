@@ -30,4 +30,17 @@ fn main() {
     let mut resp = message.into_response();
     resp.set_rcode(RCode::ServFail);
     println!("{}\n", resp);
+
+    let bytes = resp.as_bytes();
+    let line_size = 12;
+    for offset in (0..bytes.len()).step_by(line_size) {
+        print!("{:04} ", offset);
+        for byte in bytes[offset..(offset + line_size).min(bytes.len())].iter() {
+            print!("{:02X} ", byte);
+        }
+        println!("");
+    }
+    println!("");
+
+    socket.send_to(&bytes, &src_addr).expect("Failed to send response");
 }

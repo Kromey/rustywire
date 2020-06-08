@@ -23,4 +23,18 @@ impl Label {
 
         label
     }
+
+    pub fn as_bytes(label: &str) -> Vec<u8> {
+        if label == "." {
+            return vec![0];
+        }
+
+        let mut bytes = Vec::new();
+        for l in label.split('.') {
+            bytes.push(l.len() as u8);
+            bytes.extend(l.as_bytes());
+        }
+
+        bytes
+    }
 }
