@@ -146,14 +146,22 @@ impl From<Vec<u8>> for Message {
 
             msg.queries.push(query);
         }
-        for _ in 0..additional {
-            let (record, new_offset) = ResourceRecord::from_offset(&bytes, offset);
-            offset = new_offset;
-            if let record::RRType::OPT = record.rrtype {
-                msg.is_edns = true;
-            };
 
-            msg.additional.push(record);
+        let sections = vec![
+            (answers, &mut msg.answers),
+            (authorities, &mut msg.authorities),
+            (additional, &mut msg.additional),
+        ];
+        for (count, records) in sections {
+            for _ in 0..count {
+                let (record, new_offset) = ResourceRecord::from_offset(&bytes, offset);
+                offset = new_offset;
+                if let record::RRType::OPT = record.rrtype {
+                    msg.is_edns = true;
+                };
+
+                records.push(record);
+            }
         }
 
         msg
