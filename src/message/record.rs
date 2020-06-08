@@ -94,7 +94,8 @@ impl ResourceRecord {
             label: self.label.clone(),
             rrtype: self.rrtype,
             class: self.class,
-        }.as_bytes();
+        }
+        .as_bytes();
 
         bytes.extend(u32_to_bytes(self.ttl));
         bytes.extend(u16_to_bytes(self.data.len() as u16));

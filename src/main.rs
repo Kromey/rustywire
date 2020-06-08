@@ -42,5 +42,7 @@ fn main() {
     }
     println!("");
 
-    socket.send_to(&bytes, &src_addr).expect("Failed to send response");
+    socket
+        .send_to(&bytes, &src_addr)
+        .expect("Failed to send response");
 }
