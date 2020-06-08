@@ -1,9 +1,9 @@
 mod parameters;
 
-pub use parameters::*;
-use std::fmt;
 use super::label::Label;
 use crate::utils::{bytes_to_u16, bytes_to_u32};
+pub use parameters::*;
+use std::fmt;
 
 #[derive(Debug)]
 pub struct PartialRecord {
@@ -21,10 +21,10 @@ impl PartialRecord {
             len => offset += len + 1,
         };
 
-        let rrtype = RRType::from(bytes_to_u16(&bytes[offset..offset+2]));
+        let rrtype = RRType::from(bytes_to_u16(&bytes[offset..offset + 2]));
         let class = match rrtype {
             RRType::OPT => Class::NONE,
-            _ => Class::from(bytes_to_u16(&bytes[offset+2..offset+4])),
+            _ => Class::from(bytes_to_u16(&bytes[offset + 2..offset + 4])),
         };
         offset += 4;
 
@@ -58,12 +58,12 @@ impl ResourceRecord {
     pub fn from_offset(bytes: &[u8], offset: usize) -> (ResourceRecord, usize) {
         let (partial, mut offset) = PartialRecord::from_offset(bytes, offset);
 
-        let ttl = bytes_to_u32(&bytes[offset..offset+4]);
-        let data_len = bytes_to_u16(&bytes[offset+4..offset+6]) as usize;
+        let ttl = bytes_to_u32(&bytes[offset..offset + 4]);
+        let data_len = bytes_to_u16(&bytes[offset + 4..offset + 6]) as usize;
 
         offset += 6;
 
-        let data = (&bytes[offset..offset+data_len]).to_vec();
+        let data = (&bytes[offset..offset + data_len]).to_vec();
         offset += data_len;
 
         (
@@ -86,6 +86,10 @@ impl fmt::Display for ResourceRecord {
             bytes = format!("{}{:02X} ", bytes, byte);
         }
 
-        write!(f, "{} {} {:?} {:?} {}", self.label, self.ttl, self.class, self.rrtype, bytes)
+        write!(
+            f,
+            "{} {} {:?} {:?} {}",
+            self.label, self.ttl, self.class, self.rrtype, bytes
+        )
     }
 }

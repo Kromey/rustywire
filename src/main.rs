@@ -17,7 +17,7 @@ fn main() {
     let line_size = 12;
     for offset in (0..number_of_bytes).step_by(line_size) {
         print!("{:04} ", offset);
-        for byte in data[offset..(offset+line_size).min(number_of_bytes)].iter() {
+        for byte in data[offset..(offset + line_size).min(number_of_bytes)].iter() {
             print!("{:02X} ", byte);
         }
         println!("");

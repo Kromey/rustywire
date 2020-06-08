@@ -2,8 +2,8 @@ mod label;
 mod record;
 
 use crate::utils::bytes_to_u16;
-use record::{PartialRecord, ResourceRecord};
 pub use record::{Flags, OpCode, RCode};
+use record::{PartialRecord, ResourceRecord};
 use std::fmt;
 
 #[derive(Debug)]
@@ -103,11 +103,18 @@ impl fmt::Display for Message {
             header = format!("{} Response", header);
 
             match self.get_rcode() {
-                RCode::NoError => {},
+                RCode::NoError => {}
                 rcode => header = format!("{} {:?}", header, rcode),
             };
         }
-        let flags = vec![Flags::AA, Flags::TC, Flags::RD, Flags::RA, Flags::AD, Flags::CD];
+        let flags = vec![
+            Flags::AA,
+            Flags::TC,
+            Flags::RD,
+            Flags::RA,
+            Flags::AD,
+            Flags::CD,
+        ];
         for flag in flags {
             if self.get_flag(flag) {
                 header = format!("{} {:?}", header, flag);
