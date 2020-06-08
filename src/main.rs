@@ -1,4 +1,4 @@
-use rustywire::message::{Flags, Message};
+use rustywire::message::Message;
 use std::net::UdpSocket;
 
 fn main() {
