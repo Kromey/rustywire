@@ -79,14 +79,12 @@ impl From<Vec<u8>> for Message {
         for _ in 0..queries {
             let (query, new_offset) = PartialRecord::from_offset(&bytes, offset);
             offset = new_offset;
-            println!("{}", query);
 
             msg.queries.push(query);
         }
         for _ in 0..additional {
             let (record, new_offset) = ResourceRecord::from_offset(&bytes, offset);
             offset = new_offset;
-            println!("{}", record);
             if let record::RRType::OPT = record.rrtype {
                 msg.is_edns = true;
             };
