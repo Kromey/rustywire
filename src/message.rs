@@ -6,7 +6,7 @@ pub use record::{Flags, OpCode, RCode};
 use record::{PartialRecord, ResourceRecord};
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Message {
     id: u16,
     flags: u16,
