@@ -25,14 +25,5 @@ fn main() {
     println!("");
 
     let message = Message::from(buf[..number_of_bytes].to_vec());
-    println!("\n{:#?}", message);
-    println!("QR: {:?}", message.get_flag(Flags::QR));
-    println!("AA: {:?}", message.get_flag(Flags::AA));
-    println!("TC: {:?}", message.get_flag(Flags::TC));
-    println!("RD: {:?}", message.get_flag(Flags::RD));
-    println!("RA: {:?}", message.get_flag(Flags::RA));
-    println!("AD: {:?}", message.get_flag(Flags::AD));
-    println!("CD: {:?}", message.get_flag(Flags::CD));
-    println!("OpCode: {:?}", message.get_opcode());
-    println!("RCode: {:?}", message.get_rcode());
+    println!("{}\n", message);
 }

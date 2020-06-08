@@ -41,7 +41,7 @@ impl PartialRecord {
 
 impl fmt::Display for PartialRecord {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}\t{:?}\t{:?}", self.label, self.class, self.rrtype)
+        write!(f, "{} {:?} {:?}", self.label, self.class, self.rrtype)
     }
 }
 
@@ -86,6 +86,6 @@ impl fmt::Display for ResourceRecord {
             bytes = format!("{}{:02X} ", bytes, byte);
         }
 
-        write!(f, "{}\t{}\t{:?}\t{:?}\t{}", self.label, self.ttl, self.class, self.rrtype, bytes)
+        write!(f, "{} {} {:?} {:?} {}", self.label, self.ttl, self.class, self.rrtype, bytes)
     }
 }
