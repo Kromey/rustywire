@@ -109,62 +109,39 @@ impl fmt::Display for Message {
                 rcode => header = format!("{} {:?}", header, rcode),
             };
         }
-        if self.get_flag(Flags::AA) {
-            header = format!("{} AA", header);
-        }
-        if self.get_flag(Flags::TC) {
-            header = format!("{} TC", header);
-        }
-        if self.get_flag(Flags::RD) {
-            header = format!("{} RD", header);
-        }
-        if self.get_flag(Flags::RA) {
-            header = format!("{} RA", header);
-        }
-        if self.get_flag(Flags::AD) {
-            header = format!("{} AD", header);
-        }
-        if self.get_flag(Flags::CD) {
-            header = format!("{} CD", header);
+        let flags = vec![Flags::AA, Flags::TC, Flags::RD, Flags::RA, Flags::AD, Flags::CD];
+        for flag in flags {
+            if self.get_flag(flag) {
+                header = format!("{} {:?}", header, flag);
+            }
         }
         header = format!("+-{:-^66}-+\n| {:66} |", " Header ", header);
 
-        let mut query = format!("+-{:-^66}-+", " Query ");
+        let mut body = format!("+-{:-^66}-+", " Query ");
         if self.queries.len() > 0 {
             for q in self.queries.iter() {
-                query = format!("{}\n| {:66} |", query, format!("{}", q));
+                body = format!("{}\n| {:66} |", body, format!("{}", q));
             }
         } else {
-            query = format!("{}\n|{:68}|", query, "");
+            body = format!("{}\n|{:68}|", body, "");
         }
 
-        let mut answer = format!("+-{:-^66}-+", " Answer ");
-        if self.answers.len() > 0 {
-            for ans in self.answers.iter() {
-                answer = format!("{}\n| {:66} |", answer, format!("{}", ans));
+        let records = vec![
+            ("Answer", &self.answers),
+            ("Authority", &self.authorities),
+            ("Additional", &self.additional),
+        ];
+        for (section, record) in records {
+            body = format!("{}\n+-{:-^66}-+", body, format!(" {} ", section));
+            if record.len() > 0 {
+                for rec in record.iter() {
+                    body = format!("{}\n| {:66} |", body, format!("{}", rec));
+                }
+            } else {
+                body = format!("{}\n|{:68}|", body, "");
             }
-        } else {
-            answer = format!("{}\n|{:68}|", answer, "");
         }
 
-        let mut authority = format!("+-{:-^66}-+", " Authority ");
-        if self.authorities.len() > 0 {
-            for auth in self.authorities.iter() {
-                authority = format!("{}\n| {:66} |", authority, format!("{}", auth));
-            }
-        } else {
-            authority = format!("{}\n|{:68}|", authority, "");
-        }
-
-        let mut additional = format!("+-{:-^66}-+", " Additional ");
-        if self.additional.len() > 0 {
-            for addl in self.additional.iter() {
-                additional = format!("{}\n| {:66} |", additional, format!("{}", addl));
-            }
-        } else {
-            additional = format!("{}\n|{:68}|", additional, "");
-        }
-
-        write!(f, "{}\n{}\n{}\n{}\n{}\n+{:-^68}+", header, query, answer, authority, additional, "-")
+        write!(f, "{}\n{}\n+{:-^68}+", header, body, "-")
     }
 }

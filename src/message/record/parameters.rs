@@ -22,7 +22,7 @@ pub enum RRType {
 }
 
 /// DNS Header Flags
-#[derive(Debug)]
+#[derive(Clone,Copy,Debug)]
 pub enum Flags {
     /// Query/Response: Set if a response, clear if a query
     QR = 0x8000,
