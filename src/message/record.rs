@@ -101,7 +101,10 @@ impl ResourceRecord {
 
     fn format_rdata(&self) -> String {
         match self.rrtype {
-            RRType::A => format!("{}.{}.{}.{}", self.data[0], self.data[1], self.data[2], self.data[3]),
+            RRType::A => format!(
+                "{}.{}.{}.{}",
+                self.data[0], self.data[1], self.data[2], self.data[3]
+            ),
             _ => {
                 let mut bytes = format!("");
                 for byte in self.data.iter() {
@@ -119,7 +122,11 @@ impl fmt::Display for ResourceRecord {
         write!(
             f,
             "{} {} {:?} {:?} {}",
-            self.label, self.ttl, self.class, self.rrtype, self.format_rdata()
+            self.label,
+            self.ttl,
+            self.class,
+            self.rrtype,
+            self.format_rdata()
         )
     }
 }

@@ -21,7 +21,7 @@ impl Label {
                     label.push('.');
 
                     offset += len;
-                },
+                }
                 3 => {
                     let mut pointer = (len << 8) | (bytes[offset + 1] as usize);
                     pointer &= 0x3FFF;
@@ -30,7 +30,7 @@ impl Label {
                     label.push_str(&sub_label);
 
                     return (label, offset + 2);
-                },
+                }
                 x => panic!("Invalid label type: 0b{:2b}", x),
             };
         }
