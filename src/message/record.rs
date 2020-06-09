@@ -13,13 +13,8 @@ pub struct PartialRecord {
 }
 
 impl PartialRecord {
-    pub fn from_offset(bytes: &[u8], mut offset: usize) -> (PartialRecord, usize) {
-        let label = Label::from_offset(bytes, offset);
-
-        match label.len() {
-            1 => offset += 1,
-            len => offset += len + 1,
-        };
+    pub fn from_offset(bytes: &[u8], offset: usize) -> (PartialRecord, usize) {
+        let (label, mut offset) = Label::from_offset(bytes, offset);
 
         let rrtype = RRType::from(bytes_to_u16(&bytes[offset..offset + 2]));
         let class = match rrtype {

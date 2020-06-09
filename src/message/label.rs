@@ -4,24 +4,38 @@ use std::str;
 pub struct Label {}
 
 impl Label {
-    pub fn from_offset(bytes: &[u8], offset: usize) -> String {
-        let mut offset = offset;
+    pub fn from_offset(bytes: &[u8], mut offset: usize) -> (String, usize) {
         let mut label = String::new();
 
         if bytes[offset] == 0 {
-            return String::from(".");
+            return (String::from("."), offset + 1);
         }
 
         while bytes[offset] > 0 {
             let len = bytes[offset] as usize;
-            offset += 1;
-            label.push_str(str::from_utf8(&bytes[offset..(offset + len)]).unwrap());
-            label.push('.');
 
-            offset += len;
+            match len >> 6 {
+                0 => {
+                    offset += 1;
+                    label.push_str(str::from_utf8(&bytes[offset..(offset + len)]).unwrap());
+                    label.push('.');
+
+                    offset += len;
+                },
+                3 => {
+                    let mut pointer = (len << 8) | (bytes[offset + 1] as usize);
+                    pointer &= 0x3FFF;
+
+                    let (sub_label, _) = Label::from_offset(&bytes, pointer);
+                    label.push_str(&sub_label);
+
+                    return (label, offset + 2);
+                },
+                x => panic!("Invalid label type: 0b{:2b}", x),
+            };
         }
 
-        label
+        (label, offset + 1)
     }
 
     pub fn as_bytes(label: &str) -> Vec<u8> {
