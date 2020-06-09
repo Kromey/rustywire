@@ -36,11 +36,9 @@ fn main() {
         println!("UPSTREAM REPLY:\n{}\n", upstream);
     }
 
-    let mut resp = message.into_response();
-    resp.set_rcode(RCode::ServFail);
-    println!("SENDING:\n{}\n", resp);
+    println!("SENDING:\n{}\n", upstream);
 
-    let bytes = resp.as_bytes();
+    let bytes = upstream.as_bytes();
     dump_hex(&bytes);
 
     socket
