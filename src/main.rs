@@ -1,4 +1,5 @@
 use rustywire::message::{Message, RCode};
+use rustywire::utils::dump_hex;
 use std::net::{Ipv4Addr, UdpSocket};
 
 fn main() {
@@ -14,15 +15,7 @@ fn main() {
     println!("Got {} bytes from {:?}", number_of_bytes, src_addr);
 
     let data = &buf[..number_of_bytes];
-    let line_size = 12;
-    for offset in (0..number_of_bytes).step_by(line_size) {
-        print!("{:04} ", offset);
-        for byte in data[offset..(offset + line_size).min(number_of_bytes)].iter() {
-            print!("{:02X} ", byte);
-        }
-        println!("");
-    }
-    println!("");
+    dump_hex(&data);
 
     let message = Message::from(buf[..number_of_bytes].to_vec());
     println!("RECEIVED:\n{}\n", message);
@@ -38,6 +31,7 @@ fn main() {
         let mut buf = [0u8; 512];
         let received = sock.recv(&mut buf).expect("Could not receive reply");
 
+        dump_hex(&buf[..received]);
         upstream = Message::from(buf[..received].to_vec());
         println!("UPSTREAM REPLY:\n{}\n", upstream);
     }
@@ -47,15 +41,7 @@ fn main() {
     println!("SENDING:\n{}\n", resp);
 
     let bytes = resp.as_bytes();
-    let line_size = 12;
-    for offset in (0..bytes.len()).step_by(line_size) {
-        print!("{:04} ", offset);
-        for byte in bytes[offset..(offset + line_size).min(bytes.len())].iter() {
-            print!("{:02X} ", byte);
-        }
-        println!("");
-    }
-    println!("");
+    dump_hex(&bytes);
 
     socket
         .send_to(&bytes, &src_addr)

@@ -16,3 +16,18 @@ pub fn u32_to_bytes(val: u32) -> Vec<u8> {
 
     bytes
 }
+
+const HEX_LINE_SIZE: usize = 12;
+
+pub fn dump_hex(bytes: &[u8]) {
+    let number_of_bytes = bytes.len();
+
+    for offset in (0..number_of_bytes).step_by(HEX_LINE_SIZE) {
+        print!("{:04} ", offset);
+        for byte in bytes[offset..(offset + HEX_LINE_SIZE).min(number_of_bytes)].iter() {
+            print!("{:02X} ", byte);
+        }
+        println!("");
+    }
+    println!("");
+}
