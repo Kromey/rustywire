@@ -1,9 +1,15 @@
+use std::convert::TryInto;
+
 pub fn bytes_to_u16(bytes: &[u8]) -> u16 {
-    (bytes[0] as u16) << 8 | bytes[1] as u16
+    let (bytes, _) = bytes.split_at(std::mem::size_of::<u16>());
+
+    u16::from_be_bytes(bytes.try_into().unwrap())
 }
 
 pub fn bytes_to_u32(bytes: &[u8]) -> u32 {
-    (bytes_to_u16(&bytes[0..2]) as u32) << 16 | bytes_to_u16(&bytes[2..4]) as u32
+    let (bytes, _) = bytes.split_at(std::mem::size_of::<u32>());
+
+    u32::from_be_bytes(bytes.try_into().unwrap())
 }
 
 pub fn u16_to_bytes(val: u16) -> Vec<u8> {
