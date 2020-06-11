@@ -1,7 +1,7 @@
 mod parameters;
 
 use super::label::Label;
-use crate::utils::{bytes_to_u16, bytes_to_u32, u16_to_bytes, u32_to_bytes};
+use crate::{bytes_to, decompose, int_to_bytes};
 pub use parameters::*;
 use std::fmt;
 
@@ -16,10 +16,12 @@ impl PartialRecord {
     pub fn from_offset(bytes: &[u8], offset: usize) -> (PartialRecord, usize) {
         let (label, mut offset) = Label::from_offset(bytes, offset);
 
-        let rrtype = RRType::from(bytes_to_u16(&bytes[offset..offset + 2]));
+        let (rrtype, class) = decompose!(bytes[offset..offset + 4], u16, u16);
+
+        let rrtype = RRType::from(rrtype);
         let class = match rrtype {
             RRType::OPT => Class::NONE,
-            _ => Class::from(bytes_to_u16(&bytes[offset + 2..offset + 4])),
+            _ => Class::from(class),
         };
         offset += 4;
 
@@ -38,8 +40,8 @@ impl PartialRecord {
 
         bytes.extend(Label::as_bytes(&self.label));
 
-        bytes.extend(u16_to_bytes(self.rrtype as u16));
-        bytes.extend(u16_to_bytes(self.class as u16));
+        bytes.extend(int_to_bytes!(self.rrtype as u16));
+        bytes.extend(int_to_bytes!(self.class as u16));
 
         bytes
     }
@@ -64,8 +66,8 @@ impl ResourceRecord {
     pub fn from_offset(bytes: &[u8], offset: usize) -> (ResourceRecord, usize) {
         let (partial, mut offset) = PartialRecord::from_offset(bytes, offset);
 
-        let ttl = bytes_to_u32(&bytes[offset..offset + 4]);
-        let data_len = bytes_to_u16(&bytes[offset + 4..offset + 6]) as usize;
+        let (ttl, data_len) = decompose!(bytes[offset..offset + 6], u32, u16);
+        let data_len = data_len as usize;
 
         offset += 6;
 
@@ -92,8 +94,8 @@ impl ResourceRecord {
         }
         .as_bytes();
 
-        bytes.extend(u32_to_bytes(self.ttl));
-        bytes.extend(u16_to_bytes(self.data.len() as u16));
+        bytes.extend(int_to_bytes!(self.ttl));
+        bytes.extend(int_to_bytes!(self.data.len() as u16));
         bytes.extend(self.data.iter());
 
         bytes

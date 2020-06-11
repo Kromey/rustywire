@@ -1,7 +1,7 @@
 mod label;
 mod record;
 
-use crate::utils::{bytes_to_u16, u16_to_bytes};
+use crate::{bytes_to, decompose, int_to_bytes};
 pub use record::{Flags, OpCode, RCode};
 use record::{PartialRecord, ResourceRecord};
 use std::fmt;
@@ -95,13 +95,13 @@ impl Message {
     pub fn as_bytes(&self) -> Vec<u8> {
         let mut bytes = Vec::with_capacity(512);
 
-        bytes.extend(u16_to_bytes(self.id));
-        bytes.extend(u16_to_bytes(self.flags));
+        bytes.extend(int_to_bytes!(self.id));
+        bytes.extend(int_to_bytes!(self.flags));
 
-        bytes.extend(u16_to_bytes(self.queries.len() as u16));
-        bytes.extend(u16_to_bytes(self.answers.len() as u16));
-        bytes.extend(u16_to_bytes(self.authorities.len() as u16));
-        bytes.extend(u16_to_bytes(self.additional.len() as u16));
+        bytes.extend(int_to_bytes!(self.queries.len() as u16));
+        bytes.extend(int_to_bytes!(self.answers.len() as u16));
+        bytes.extend(int_to_bytes!(self.authorities.len() as u16));
+        bytes.extend(int_to_bytes!(self.additional.len() as u16));
 
         for q in self.queries.iter() {
             bytes.extend(q.as_bytes());
@@ -120,13 +120,9 @@ impl From<Vec<u8>> for Message {
     fn from(bytes: Vec<u8>) -> Message {
         assert!(bytes.len() >= 12);
 
-        let id = bytes_to_u16(&bytes[0..2]);
-        let flags = bytes_to_u16(&bytes[2..4]);
+        let (id, flags) = decompose!(bytes[0..4], u16, u16);
 
-        let queries = bytes_to_u16(&bytes[4..6]);
-        let answers = bytes_to_u16(&bytes[6..8]);
-        let authorities = bytes_to_u16(&bytes[8..10]);
-        let additional = bytes_to_u16(&bytes[10..12]);
+        let (queries, answers, authorities, additional) = decompose!(bytes[4..12], u16, u16, u16, u16);
 
         let mut offset = 12;
 

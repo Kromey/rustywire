@@ -1,3 +1,4 @@
+use crate::bytes_to;
 use std::str;
 
 #[derive(Debug)]
@@ -23,7 +24,7 @@ impl Label {
                     offset += len;
                 }
                 3 => {
-                    let mut pointer = (len << 8) | (bytes[offset + 1] as usize);
+                    let mut pointer = bytes_to!(u16, bytes[offset..offset + 2]) as usize;
                     pointer &= 0x3FFF;
 
                     let (sub_label, _) = Label::from_offset(&bytes, pointer);

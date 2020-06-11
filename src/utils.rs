@@ -1,23 +1,39 @@
-use std::convert::TryInto;
-
-pub fn bytes_to_u16(bytes: &[u8]) -> u16 {
-    let (bytes, _) = bytes.split_at(std::mem::size_of::<u16>());
-
-    u16::from_be_bytes(bytes.try_into().unwrap())
+#[macro_export]
+macro_rules! bytes_to {
+    ($T:ty, $bytes:expr) => {
+        {
+            let mut _start = 0;
+            bytes_to!($T, $bytes, _start)
+        }
+    };
+    ($T:ty, $bytes:expr, $start:ident) => {
+        {
+            use std::convert::TryInto;
+            let size = std::mem::size_of::<$T>();
+            let (bytes, _) = $bytes[$start..].split_at(size);
+            $start += size;
+            <$T>::from_be_bytes(bytes.try_into().unwrap())
+        }
+    };
 }
 
-pub fn bytes_to_u32(bytes: &[u8]) -> u32 {
-    let (bytes, _) = bytes.split_at(std::mem::size_of::<u32>());
-
-    u32::from_be_bytes(bytes.try_into().unwrap())
+#[macro_export]
+macro_rules! int_to_bytes {
+    ($val:expr) => {
+        $val.to_be_bytes().to_vec()
+    };
 }
 
-pub fn u16_to_bytes(val: u16) -> Vec<u8> {
-    val.to_be_bytes()[..].into()
-}
-
-pub fn u32_to_bytes(val: u32) -> Vec<u8> {
-    val.to_be_bytes()[..].into()
+#[macro_export]
+macro_rules! decompose {
+    ($bytes:expr, $($T:ident),+) => {
+        {
+            let mut _start = 0;
+            (
+                $(bytes_to!($T, $bytes, _start),)+
+            )
+        }
+    };
 }
 
 const HEX_LINE_SIZE: usize = 12;
