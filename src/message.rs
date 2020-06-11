@@ -122,7 +122,8 @@ impl From<Vec<u8>> for Message {
 
         let (id, flags) = decompose!(bytes[0..4], u16, u16);
 
-        let (queries, answers, authorities, additional) = decompose!(bytes[4..12], u16, u16, u16, u16);
+        let (queries, answers, authorities, additional) =
+            decompose!(bytes[4..12], u16, u16, u16, u16);
 
         let mut offset = 12;
 

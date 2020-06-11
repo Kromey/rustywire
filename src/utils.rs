@@ -1,20 +1,16 @@
 #[macro_export]
 macro_rules! bytes_to {
-    ($T:ty, $bytes:expr) => {
-        {
-            let mut _start = 0;
-            bytes_to!($T, $bytes, _start)
-        }
-    };
-    ($T:ty, $bytes:expr, $start:ident) => {
-        {
-            use std::convert::TryInto;
-            let size = std::mem::size_of::<$T>();
-            let (bytes, _) = $bytes[$start..].split_at(size);
-            $start += size;
-            <$T>::from_be_bytes(bytes.try_into().unwrap())
-        }
-    };
+    ($T:ty, $bytes:expr) => {{
+        let mut _start = 0;
+        bytes_to!($T, $bytes, _start)
+    }};
+    ($T:ty, $bytes:expr, $start:ident) => {{
+        use std::convert::TryInto;
+        let size = std::mem::size_of::<$T>();
+        let (bytes, _) = $bytes[$start..].split_at(size);
+        $start += size;
+        <$T>::from_be_bytes(bytes.try_into().unwrap())
+    }};
 }
 
 #[macro_export]
