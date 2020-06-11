@@ -13,14 +13,11 @@ pub fn bytes_to_u32(bytes: &[u8]) -> u32 {
 }
 
 pub fn u16_to_bytes(val: u16) -> Vec<u8> {
-    vec![(val >> 8) as u8, val as u8]
+    val.to_be_bytes()[..].into()
 }
 
 pub fn u32_to_bytes(val: u32) -> Vec<u8> {
-    let mut bytes = u16_to_bytes((val >> 16) as u16);
-    bytes.extend(u16_to_bytes(val as u16));
-
-    bytes
+    val.to_be_bytes()[..].into()
 }
 
 const HEX_LINE_SIZE: usize = 12;
