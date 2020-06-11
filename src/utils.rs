@@ -24,10 +24,14 @@ macro_rules! int_to_bytes {
 macro_rules! decompose {
     ($bytes:expr, $($T:ident),+) => {
         {
-            let mut _start = 0;
-            (
-                $(bytes_to!($T, $bytes, _start),)+
-            )
+            let mut start = 0;
+            let val = (
+                $(bytes_to!($T, $bytes, start),)+
+            );
+
+            assert_eq!(start, $bytes.len());
+
+            val
         }
     };
 }
