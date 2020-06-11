@@ -22,18 +22,16 @@ macro_rules! int_to_bytes {
 
 #[macro_export]
 macro_rules! decompose {
-    ($bytes:expr, $($T:ident),+) => {
-        {
-            let mut start = 0;
-            let val = (
-                $(bytes_to!($T, $bytes, start),)+
-            );
+    ($bytes:expr, $($T:ident),+) => {{
+        let mut start = 0;
+        let val = (
+            $(bytes_to!($T, $bytes, start),)+
+        );
 
-            assert_eq!(start, $bytes.len());
+        assert_eq!(start, $bytes.len());
 
-            val
-        }
-    };
+        val
+    }};
 }
 
 const HEX_LINE_SIZE: usize = 12;
