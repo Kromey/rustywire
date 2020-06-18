@@ -1,4 +1,4 @@
-use rustywire::message::{Message, RCode};
+use rustywire::message::Message;
 use rustywire::utils::dump_hex;
 use std::net::{Ipv4Addr, UdpSocket};
 

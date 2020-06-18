@@ -1,10 +1,9 @@
-mod label;
 mod record;
 
-use crate::{bytes_to, decompose, int_to_bytes};
-pub use record::{Flags, OpCode, RCode};
+use bytes::{Buf, BufMut};
+pub use record::{Flags, OpCode, RCode, RRType, Class};
 use record::{PartialRecord, ResourceRecord};
-use std::fmt;
+use std::{fmt, str};
 
 #[derive(Clone, Debug)]
 pub struct Message {
@@ -95,37 +94,86 @@ impl Message {
     pub fn as_bytes(&self) -> Vec<u8> {
         let mut bytes = Vec::with_capacity(512);
 
-        bytes.extend(int_to_bytes!(self.id));
-        bytes.extend(int_to_bytes!(self.flags));
+        bytes.put_u16(self.id);
+        bytes.put_u16(self.flags);
 
-        bytes.extend(int_to_bytes!(self.queries.len() as u16));
-        bytes.extend(int_to_bytes!(self.answers.len() as u16));
-        bytes.extend(int_to_bytes!(self.authorities.len() as u16));
-        bytes.extend(int_to_bytes!(self.additional.len() as u16));
+        bytes.put_u16(self.queries.len() as u16);
+        bytes.put_u16(self.answers.len() as u16);
+        bytes.put_u16(self.authorities.len() as u16);
+        bytes.put_u16(self.additional.len() as u16);
 
         for q in self.queries.iter() {
-            bytes.extend(q.as_bytes());
+            bytes.extend(Message::name_as_bytes(&q.label));
+            bytes.put_u16(q.rrtype as u16);
+            bytes.put_u16(q.class as u16);
         }
         for records in vec![&self.answers, &self.authorities, &self.additional] {
             for record in records.iter() {
-                bytes.extend(record.as_bytes());
+                bytes.extend(Message::name_as_bytes(&record.label));
+                bytes.put_u16(record.rrtype as u16);
+                bytes.put_u16(record.class as u16);
+                bytes.put_u32(record.ttl);
+                bytes.put_u16(record.data.len() as u16);
+                bytes.extend(&record.data);
             }
         }
 
         bytes
+    }
+
+    fn name_as_bytes(name: &str) -> Vec<u8> {
+        if name == "." {
+            return vec![0];
+        }
+
+        let mut bytes = Vec::new();
+        for label in name.split('.') {
+            bytes.put_u8(label.len() as u8);
+            bytes.extend(label.as_bytes());
+        }
+
+        bytes
+    }
+
+    fn get_name(mut bytes: &[u8]) -> String {
+        let mut name = vec![];
+        loop {
+            let len = bytes.get_u8() as usize;
+
+            if len >= 0xC0 {
+                bytes.advance(1);
+                name.push(".");
+                break;
+            }
+
+            name.push(str::from_utf8(&bytes[..len]).unwrap());
+            bytes.advance(len);
+
+            if len == 0 {
+                break;
+            }
+        }
+
+        name.join(".")
     }
 }
 
 impl From<Vec<u8>> for Message {
     fn from(bytes: Vec<u8>) -> Message {
         assert!(bytes.len() >= 12);
+        let mut bytes = &bytes[..];
 
-        let (id, flags) = decompose!(bytes[0..4], u16, u16);
+        let id = bytes.get_u16();
+        let flags = bytes.get_u16();
 
-        let (queries, answers, authorities, additional) =
-            decompose!(bytes[4..12], u16, u16, u16, u16);
+        println!("{} {:04X}", id, flags);
 
-        let mut offset = 12;
+        let queries = bytes.get_u16();
+        let answers = bytes.get_u16();
+        let authorities = bytes.get_u16();
+        let additional = bytes.get_u16();
+
+        println!("{} {} {} {}", queries, answers, authorities, additional);
 
         let mut msg = Message {
             id,
@@ -138,8 +186,19 @@ impl From<Vec<u8>> for Message {
         };
 
         for _ in 0..queries {
-            let (query, new_offset) = PartialRecord::from_offset(&bytes, offset);
-            offset = new_offset;
+            let name = Message::get_name(&bytes);
+            //TODO: Can we just carry the internal state forward from the previous line?
+            bytes.advance(name.len() + 1);
+            let qtype = bytes.get_u16();
+            let class = bytes.get_u16();
+
+            let query = PartialRecord {
+                label: name,
+                rrtype: qtype.into(),
+                class: class.into(),
+            };
+
+            println!("{}", query);
 
             msg.queries.push(query);
         }
@@ -151,8 +210,32 @@ impl From<Vec<u8>> for Message {
         ];
         for (count, records) in sections {
             for _ in 0..count {
-                let (record, new_offset) = ResourceRecord::from_offset(&bytes, offset);
-                offset = new_offset;
+                let name = Message::get_name(&bytes);
+                //TODO: As above, can the previous line somehow advance us here?
+                bytes.advance(name.len() + 1);
+                let rtype = bytes.get_u16();
+                let class = bytes.get_u16();
+                let ttl = bytes.get_u32();
+                let rdlen = bytes.get_u16() as usize;
+                println!("{} {} {} {} {}", name, rtype, class, ttl, rdlen);
+                let rdata = &bytes[..rdlen];
+                bytes.advance(rdlen);
+
+                let rtype = rtype.into();
+
+                let record = ResourceRecord {
+                    label: name,
+                    rrtype: rtype,
+                    class: match rtype {
+                        RRType::OPT => Class::NONE,
+                        _ => Class::from(class),
+                    },
+                    ttl,
+                    data: rdata.into(),
+                };
+
+                println!("{}", record);
+
                 if let record::RRType::OPT = record.rrtype {
                     msg.is_edns = true;
                 };
