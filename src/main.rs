@@ -25,7 +25,7 @@ fn main() {
         let addr = Ipv4Addr::UNSPECIFIED;
         let port = 34567;
         let sock = UdpSocket::bind((addr, port)).expect("Could not bind to port");
-        sock.connect("1.1.1.1:53").expect("Could not connect");
+        sock.connect(include_str!(".upstream").trim_end()).expect("Could not connect");
         sock.send(&upstream.as_bytes()).expect("Could not send");
 
         let mut buf = [0u8; 512];
