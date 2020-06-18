@@ -1,7 +1,7 @@
 mod record;
 
 use bytes::{Buf, BufMut};
-pub use record::{Flags, OpCode, RCode, RRType, Class};
+pub use record::{Class, Flags, OpCode, RCode, RRType};
 use record::{PartialRecord, ResourceRecord};
 use std::{fmt, str};
 
