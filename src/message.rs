@@ -1,6 +1,6 @@
 mod record;
 
-use bytes::{Buf, BufMut};
+use bytes::{Buf, BufMut, Bytes};
 pub use record::{Class, Flags, OpCode, RCode, RRType};
 use record::{PartialRecord, ResourceRecord};
 use std::{fmt, str};
@@ -158,10 +158,9 @@ impl Message {
     }
 }
 
-impl From<Vec<u8>> for Message {
-    fn from(bytes: Vec<u8>) -> Message {
+impl From<Bytes> for Message {
+    fn from(mut bytes: Bytes) -> Message {
         assert!(bytes.len() >= 12);
-        let mut bytes = &bytes[..];
 
         let id = bytes.get_u16();
         let flags = bytes.get_u16();
@@ -218,7 +217,7 @@ impl From<Vec<u8>> for Message {
                 let ttl = bytes.get_u32();
                 let rdlen = bytes.get_u16() as usize;
                 println!("{} {} {} {} {}", name, rtype, class, ttl, rdlen);
-                let rdata = &bytes[..rdlen];
+                let rdata = bytes.slice(..rdlen);
                 bytes.advance(rdlen);
 
                 let rtype = rtype.into();

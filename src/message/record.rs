@@ -1,5 +1,6 @@
 mod parameters;
 
+use bytes::Bytes;
 pub use parameters::*;
 use std::fmt;
 
@@ -22,7 +23,7 @@ pub struct ResourceRecord {
     pub rrtype: RRType,
     pub class: Class,
     pub ttl: u32,
-    pub data: Vec<u8>,
+    pub data: Bytes,
 }
 
 impl ResourceRecord {
