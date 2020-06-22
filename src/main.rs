@@ -10,9 +10,9 @@ fn main() {
     let socket = UdpSocket::bind("127.0.0.1:3553").expect("Couldn't bind to address");
     let mut buf = BytesMut::with_capacity(512);
 
-    /// Safety: We've just allocated these bytes, so despite them being uninitialized
-    /// this is okay because they're "ours" anyway. For some reason we have to do this
-    /// in order to use this as our socket buffer.
+    // Safety: We've just allocated these bytes, and we're not going to read them until we've read
+    // data into them, and even then we're truncating the buffer back down to only what we've read.
+    // We need to do this however in order for the socket to be able to use our buffer at all.
     unsafe {
         buf.set_len(512);
     }
@@ -40,7 +40,7 @@ fn main() {
 
         let mut buf = BytesMut::with_capacity(512);
 
-        /// Safety: See above where we're doing the same thing
+        // Safety: See above where we're doing the same thing
         unsafe {
             buf.set_len(512);
         }
