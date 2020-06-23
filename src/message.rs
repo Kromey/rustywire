@@ -135,26 +135,31 @@ impl Message {
         bytes
     }
 
-    fn get_name(mut bytes: &[u8]) -> String {
-        let mut name = vec![];
+    fn get_name(bytes: &mut Bytes) -> String {
+        let mut name = String::new();
         loop {
             let len = bytes.get_u8() as usize;
 
             if len >= 0xC0 {
                 bytes.advance(1);
-                name.push(".");
+                name.push('.');
                 break;
             }
-
-            name.push(str::from_utf8(&bytes[..len]).unwrap());
-            bytes.advance(len);
 
             if len == 0 {
                 break;
             }
+
+            name.push_str(str::from_utf8(&bytes.slice(..len)).unwrap());
+            name.push('.');
+            bytes.advance(len);
         }
 
-        name.join(".")
+        if name.len() > 0 {
+            name
+        } else {
+            ".".into()
+        }
     }
 }
 
@@ -185,9 +190,7 @@ impl From<Bytes> for Message {
         };
 
         for _ in 0..queries {
-            let name = Message::get_name(&bytes);
-            //TODO: Can we just carry the internal state forward from the previous line?
-            bytes.advance(name.len() + 1);
+            let name = Message::get_name(&mut bytes);
             let qtype = bytes.get_u16();
             let class = bytes.get_u16();
 
@@ -209,14 +212,11 @@ impl From<Bytes> for Message {
         ];
         for (count, records) in sections {
             for _ in 0..count {
-                let name = Message::get_name(&bytes);
-                //TODO: As above, can the previous line somehow advance us here?
-                bytes.advance(name.len() + 1);
+                let name = Message::get_name(&mut bytes);
                 let rtype = bytes.get_u16();
                 let class = bytes.get_u16();
                 let ttl = bytes.get_u32();
                 let rdlen = bytes.get_u16() as usize;
-                println!("{} {} {} {} {}", name, rtype, class, ttl, rdlen);
                 let rdata = bytes.slice(..rdlen);
                 bytes.advance(rdlen);
 
